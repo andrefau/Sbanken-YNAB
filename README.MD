@@ -1,0 +1,1 @@
+# Tool for exporting transactions from Sbanken to YNAB
