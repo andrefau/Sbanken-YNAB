@@ -15,9 +15,7 @@ namespace SbankenYnab
             var client = new SbankenClient();
             client.init().Wait();
 
-            Console.WriteLine("Hello World!");
-            Console.WriteLine($"Args1 {args[0]}");
-            Console.WriteLine($"Args2 {args[1]}");
+            Console.WriteLine("*** EXIT ***");
         }
     }
 }
