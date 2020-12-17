@@ -59,7 +59,7 @@ namespace SbankenYnab
                 ClientSecret = secret
             });
 
-            if (tokenResponse.IsError) throw new Exception(tokenResponse.ErrorDescription);
+            if (tokenResponse.IsError) throw new Exception(tokenResponse.Error);
 
             // The application now has an access token.
 

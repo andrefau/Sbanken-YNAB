@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="IdentityModel" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
   </ItemGroup>
 
 </Project>
