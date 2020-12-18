@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using IdentityModel.Client;
 using Newtonsoft.Json;
 
+using SbankenYnab.Credentials;
+
 namespace SbankenYnab
 {
     class SbankenClient
@@ -13,18 +15,6 @@ namespace SbankenYnab
 
         public async Task init()
         {
-            /**
-            * Client credentials and customerId
-            * Here Oauth2 is being used with "client credentials": The "client" is the application, and we require a secret 
-            * known only to the application.
-            * Both the client id and the secret (password) are generated in Sbanken.
-            * The customer id is your birth- and personal number (national identification number)
-            */
-
-            var clientId = "******************************";
-            var secret = "******************************";
-            var customerId = "*****************";
-
             /** Setup constants */
             var discoveryEndpoint = "https://auth.sbanken.no/identityserver";
             var apiBaseAddress = "https://api.sbanken.no";
@@ -36,7 +26,7 @@ namespace SbankenYnab
                 BaseAddress = new Uri(apiBaseAddress),
                 DefaultRequestHeaders =
                 {
-                    { "customerId", customerId }
+                    { "customerId",  SbankenCredentials.CustomerId }
                 }
             };
 
@@ -55,8 +45,8 @@ namespace SbankenYnab
             // Second: the application authenticates against the token endpoint
             var tokenResponse = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest{
                 Address = disco.TokenEndpoint,
-                ClientId = clientId,
-                ClientSecret = secret
+                ClientId = SbankenCredentials.ClientId,
+                ClientSecret = SbankenCredentials.Secret
             });
 
             if (tokenResponse.IsError) throw new Exception(tokenResponse.Error);
