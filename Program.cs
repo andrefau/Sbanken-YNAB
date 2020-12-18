@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
 
 namespace SbankenYnab
@@ -10,18 +12,23 @@ namespace SbankenYnab
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("logs.log")
                 .CreateLogger();
+            
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
 
-            Log.Information("*** START ***");
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            var logger = serviceProvider.GetService<ILogger<Program>>();
+            
+            logger.LogInformation("*** START ***");
 
             if (args.Length != 2)
             {
-                Log.Error("Missing arguments.\nYou must supply two arguments when running this program.\nExample: dotnet run \"My account\" \"My budget\"");
-                Log.Information("*** EXIT ***");
-                Log.CloseAndFlush();
+                logger.LogError("Missing arguments.\nYou must supply two arguments when running this program.\nExample: dotnet run \"My account\" \"My budget\"");
+                logger.LogInformation("*** EXIT ***");
                 return;
             }
 
-            var client = new SbankenClient();
+            var client = serviceProvider.GetService<SbankenClient>();
 
             try
             {
@@ -29,14 +36,19 @@ namespace SbankenYnab
             } 
             catch (Exception ex) 
             {
-                Log.Error(ex, ex.Message);
-                Log.Information("*** EXIT ***");
-                Log.CloseAndFlush();
+                logger.LogError(ex, ex.Message);
+                logger.LogInformation("*** EXIT ***");
                 return;
             }
 
-            Log.Information("*** EXIT ***");
-            Log.CloseAndFlush();
+            logger.LogInformation("*** EXIT ***");
+        }
+
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddLogging(configure => configure.AddSerilog())
+                    .AddTransient<SbankenClient>();
+                    
         }
     }
 }

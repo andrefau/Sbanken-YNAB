@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 using SbankenYnab.Credentials;
@@ -12,6 +13,12 @@ namespace SbankenYnab
     class SbankenClient
     {
         private HttpClient _client;
+        private readonly ILogger _logger;
+
+        public SbankenClient(ILogger<SbankenClient> logger)
+        {
+            _logger = logger;
+        }
 
         public async Task init()
         {
@@ -37,12 +44,14 @@ namespace SbankenYnab
              */
 
             // First: get the OpenId configuration from Sbanken.
+            _logger.LogInformation("Getting disovery document from Sbanken...");
             var disco = await _client.GetDiscoveryDocumentAsync(discoveryEndpoint);
             if (disco.IsError) throw new Exception(disco.Error);
 
             // The application now knows how to talk to the token endpoint.
 
             // Second: the application authenticates against the token endpoint
+            _logger.LogInformation("Getting access token from Sbanken...");
             var tokenResponse = await _client.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest{
                 Address = disco.TokenEndpoint,
                 ClientId = SbankenCredentials.ClientId,
