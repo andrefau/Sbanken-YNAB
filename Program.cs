@@ -9,13 +9,16 @@ namespace SbankenYnab
     {
         static void Main(string[] args)
         {
+            /** Configure logger */
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File("logs.log")
                 .CreateLogger();
             
+            /** Set up dependency injection */
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
 
+            /** Get logger instance */
             var serviceProvider = serviceCollection.BuildServiceProvider();
             var logger = serviceProvider.GetService<ILogger<Program>>();
             
@@ -35,6 +38,16 @@ namespace SbankenYnab
             try
             {
                 sbankenClient.Init().Wait();
+
+                var account = sbankenClient
+                                .GetAccountByName(accountName)
+                                .GetAwaiter()
+                                .GetResult();
+
+                var transactions = sbankenClient
+                                    .GetTransactions(account.AccountId, fromDate: DateTime.Now, toDate: DateTime.Now)
+                                    .GetAwaiter()
+                                    .GetResult();
             } 
             catch (Exception ex) 
             {
