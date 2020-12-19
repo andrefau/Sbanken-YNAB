@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
@@ -87,6 +88,25 @@ namespace SbankenYnab
             _logger.LogInformation($"Found \"{name}\"");
 
             return account;
+        }
+
+        public async Task<List<Transaction>> GetTransactions(String accountId, DateTime fromDate, DateTime toDate)
+        {
+            _logger.LogInformation($"Getting transactions for account \"{accountId}\"...");
+
+            var stringFrom = fromDate.ToString("yyyy-MM-dd");
+            var stringTo = toDate.ToString("yyyy-MM-dd");
+
+            var transactionResponse = await _client.GetAsync($"{_bankBasePath}/api/v1/Transactions/{accountId}");
+
+            if (!transactionResponse.IsSuccessStatusCode) throw new Exception(transactionResponse.ReasonPhrase);
+
+            var transactionResult = await transactionResponse.Content.ReadAsStringAsync();
+            var transactionsList = JsonConvert.DeserializeObject<TransactionsList>(transactionResult);
+
+            _logger.LogInformation($"Found {transactionsList.AvailableItems} transactions.");
+
+            return transactionsList.Items;
         }
     }
 }
