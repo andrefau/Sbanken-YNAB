@@ -28,11 +28,13 @@ namespace SbankenYnab
                 return;
             }
 
-            var client = serviceProvider.GetService<SbankenClient>();
+            var accountName = args[0];
+            var budgetName = args[1];
+            var sbankenClient = serviceProvider.GetService<SbankenClient>();
 
             try
             {
-                client.init().Wait();
+                sbankenClient.Init().Wait();
             } 
             catch (Exception ex) 
             {
