@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 using SbankenYnab.Credentials;
+using SbankenYnab.Models;
 
 namespace SbankenYnab
 {
@@ -14,18 +14,18 @@ namespace SbankenYnab
     {
         private HttpClient _client;
         private readonly ILogger _logger;
+        private const String _bankBasePath = "/exec.bank";
 
         public SbankenClient(ILogger<SbankenClient> logger)
         {
             _logger = logger;
         }
 
-        public async Task init()
+        public async Task Init()
         {
             /** Setup constants */
             var discoveryEndpoint = "https://auth.sbanken.no/identityserver";
             var apiBaseAddress = "https://api.sbanken.no";
-            var bankBasePath = "/exec.bank";
 
             /** Initialize HttpClient */
             _client = new HttpClient()
@@ -65,6 +65,28 @@ namespace SbankenYnab
             // Finally: Set the access token on the connecting client. 
             // It will be used with all requests against the API endpoints.
             _client.SetBearerToken(tokenResponse.AccessToken);
+        }
+
+        public async Task<Account> GetAccountByName(String name)
+        {
+            _logger.LogInformation("Gettin accounts from Sbanken...");
+
+            var accountResponse = await _client.GetAsync($"{_bankBasePath}/api/v1/Accounts");
+
+            if (!accountResponse.IsSuccessStatusCode) throw new Exception(accountResponse.ReasonPhrase);
+
+            var accountResult = await accountResponse.Content.ReadAsStringAsync();
+            var accountList = JsonConvert.DeserializeObject<AccountsList>(accountResult);
+
+            _logger.LogInformation($"Found {accountList.AvailableItems} accounts. Trying to find account by name \"{name}\"...");
+
+            var account = accountList.Items.Find(a => a.Name == name);
+
+            if (account == null) throw new ArgumentException($"No account by name \"{name}\" was found.");
+
+            _logger.LogInformation($"Found \"{name}\"");
+
+            return account;
         }
     }
 }
