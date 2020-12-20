@@ -9,9 +9,9 @@ using Newtonsoft.Json;
 using SbankenYnab.Credentials;
 using SbankenYnab.Models;
 
-namespace SbankenYnab
+namespace SbankenYnab.Clients
 {
-    class SbankenClient
+    public class SbankenClient
     {
         private HttpClient _client;
         private readonly ILogger _logger;
