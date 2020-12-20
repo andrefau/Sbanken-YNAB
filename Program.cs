@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SbankenYnab.Clients;
@@ -63,7 +63,8 @@ namespace SbankenYnab
         private static void ConfigureServices(IServiceCollection services)
         {
             services.AddLogging(configure => configure.AddSerilog())
-                    .AddTransient<SbankenClient>();
+                    .AddTransient<SbankenClient>()
+                    .AddTransient<YNABClient>();
                     
         }
     }
