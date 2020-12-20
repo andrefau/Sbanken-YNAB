@@ -35,10 +35,12 @@ namespace SbankenYnab
             var accountName = args[0];
             var budgetName = args[1];
             var sbankenClient = serviceProvider.GetService<SbankenClient>();
+            var ynabClient = serviceProvider.GetService<YNABClient>();
 
             try
             {
                 sbankenClient.Init().Wait();
+                ynabClient.Init();
 
                 var account = sbankenClient
                                 .GetAccountByName(accountName)
@@ -49,6 +51,10 @@ namespace SbankenYnab
                                     .GetTransactions(account.AccountId, fromDate: DateTime.Now, toDate: DateTime.Now)
                                     .GetAwaiter()
                                     .GetResult();
+
+                var budget = ynabClient.GetBudgetByName(budgetName)
+                                .GetAwaiter()
+                                .GetResult();
             } 
             catch (Exception ex) 
             {
