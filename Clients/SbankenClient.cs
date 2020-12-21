@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 using SbankenYnab.Credentials;
-using SbankenYnab.Models;
 
 namespace SbankenYnab.Clients
 {
@@ -68,7 +67,7 @@ namespace SbankenYnab.Clients
             _client.SetBearerToken(tokenResponse.AccessToken);
         }
 
-        public async Task<Account> GetAccountByName(String name)
+        public async Task<Models.Sbanken.Account> GetAccountByName(String name)
         {
             _logger.LogInformation("Gettin accounts from Sbanken...");
 
@@ -77,7 +76,7 @@ namespace SbankenYnab.Clients
             if (!accountResponse.IsSuccessStatusCode) throw new Exception(accountResponse.ReasonPhrase);
 
             var accountResult = await accountResponse.Content.ReadAsStringAsync();
-            var accountList = JsonConvert.DeserializeObject<AccountsList>(accountResult);
+            var accountList = JsonConvert.DeserializeObject<Models.Sbanken.AccountsList>(accountResult);
 
             _logger.LogInformation($"Found {accountList.AvailableItems} accounts. Trying to find account by name \"{name}\"...");
 
@@ -90,7 +89,7 @@ namespace SbankenYnab.Clients
             return account;
         }
 
-        public async Task<List<Transaction>> GetTransactions(String accountId, DateTime fromDate, DateTime toDate)
+        public async Task<List<Models.Sbanken.Transaction>> GetTransactions(String accountId, DateTime fromDate, DateTime toDate)
         {
             _logger.LogInformation($"Getting transactions for account \"{accountId}\"...");
 
@@ -102,7 +101,7 @@ namespace SbankenYnab.Clients
             if (!transactionResponse.IsSuccessStatusCode) throw new Exception(transactionResponse.ReasonPhrase);
 
             var transactionResult = await transactionResponse.Content.ReadAsStringAsync();
-            var transactionsList = JsonConvert.DeserializeObject<TransactionsList>(transactionResult);
+            var transactionsList = JsonConvert.DeserializeObject<Models.Sbanken.TransactionsList>(transactionResult);
 
             _logger.LogInformation($"Found {transactionsList.AvailableItems} transactions.");
 

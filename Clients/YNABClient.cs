@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SbankenYnab.Credentials;
-using SbankenYnab.Models;
 
 namespace SbankenYnab.Clients
 {
@@ -33,7 +32,7 @@ namespace SbankenYnab.Clients
             };
         }
 
-        public async Task<Budget> GetBudgetByName(String name)
+        public async Task<Models.YNAB.Budget> GetBudgetByName(String name)
         {
             _logger.LogInformation("Gettin budgets from YNAB...");
 
@@ -42,7 +41,7 @@ namespace SbankenYnab.Clients
             if (!budgetResponse.IsSuccessStatusCode) throw new Exception(budgetResponse.ReasonPhrase);
 
             var budgetResult = await budgetResponse.Content.ReadAsStringAsync();
-            var budgetSummary = JsonConvert.DeserializeObject<BudgetSummaryResponse>(budgetResult);
+            var budgetSummary = JsonConvert.DeserializeObject<Models.YNAB.BudgetSummaryResponse>(budgetResult);
 
             _logger.LogInformation($"Found {budgetSummary.Data.Budgets.Count} budgets. Trying to find budget by name \"{name}\"...");
 

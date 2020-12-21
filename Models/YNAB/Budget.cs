@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SbankenYnab.Models
+namespace SbankenYnab.Models.YNAB
 {
     public class BudgetSummaryResponse
     {
