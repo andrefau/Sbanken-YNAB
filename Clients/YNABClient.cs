@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Mime;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -37,7 +39,7 @@ namespace SbankenYnab.Clients
         {
             _logger.LogInformation("Getting budgets from YNAB...");
 
-            var budgetResponse = await _client.GetAsync($"/v1/budgets");
+            var budgetResponse = await _client.GetAsync($"/v1/budgets/?include_accounts=true");
 
             if (!budgetResponse.IsSuccessStatusCode) throw new Exception(budgetResponse.ReasonPhrase);
 
@@ -55,20 +57,41 @@ namespace SbankenYnab.Clients
             return budget;
         }
 
-        public async Task<List<Models.YNAB.Account>> GetAccountsForBudget(String budgetId)
+        public async Task AddTransactions(Models.YNAB.Budget budget, List<Models.Sbanken.Transaction> sbankenTransactions)
         {
-            _logger.LogInformation($"Getting accounts for budget {budgetId}...");
+            _logger.LogInformation($"Attempting to add transactions to budget {budget.Id}...");
 
-            var accountResponse = await _client.GetAsync($"/v1/budgets/{budgetId}/accounts");
+            var account = budget.Accounts[0];
+            var ynabTransactions = new List<Models.YNAB.Transaction>();
 
-            if (!accountResponse.IsSuccessStatusCode) throw new Exception(accountResponse.ReasonPhrase);
+            sbankenTransactions.ForEach(transaction => {
+                var amount = transaction.Amount * 1000;
+                var date = transaction.AccountingDate.ToString("yyyy-MM-dd");
 
-            var accountResult = await accountResponse.Content.ReadAsStringAsync();
-            var account = JsonConvert.DeserializeObject<Models.YNAB.AccountResponse>(accountResult);
+                var ynabTransaction = new Models.YNAB.Transaction()
+                {
+                    account_id = account.Id,
+                    amount = (int)amount,
+                    date = date,
+                    memo = $"Import: {transaction.Text}",
+                    cleared = "uncleared",
+                    import_id = $"YNAB:{amount.ToString()}:{date}:1"
+                };
 
-            _logger.LogInformation($"Found {account.Data.Accounts.Count} accounts for budget {budgetId}.");
+                ynabTransactions.Add(ynabTransaction);
+            });
 
-            return account.Data.Accounts;
+            _logger.LogInformation($"Readied {ynabTransactions.Count} transactions for import...");
+
+            var data = new { transactions = ynabTransactions };
+            var json = JsonConvert.SerializeObject(data);
+            var stringContent = new StringContent(json, UnicodeEncoding.UTF8, MediaTypeNames.Application.Json);
+
+            var response = await _client.PostAsync($"/v1/budgets/{budget.Id}/transactions", stringContent);
+
+            if (!response.IsSuccessStatusCode) throw new Exception(response.ReasonPhrase);
+
+            _logger.LogInformation("Successfully added transactions to YNAB!");
         }
     }
 }
