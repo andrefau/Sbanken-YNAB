@@ -17,5 +17,6 @@ namespace SbankenYnab.Models.YNAB
     {
         public String Id { get; set; }
         public String Name { get; set; }
+        public List<Account> Accounts { get; set; }
     }
 }
