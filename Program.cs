@@ -52,13 +52,19 @@ namespace SbankenYnab
                                     .GetAwaiter()
                                     .GetResult();
 
+                if (transactions == null || transactions.Count == 0)
+                {
+                    logger.LogInformation("No transactions found.\n*** EXIT ***");
+                    return;
+                }
+
                 var budget = ynabClient.GetBudgetByName(budgetName)
                                 .GetAwaiter()
                                 .GetResult();
 
-                var ynabAccounts = ynabClient.GetAccountsForBudget(budget.Id)
-                                    .GetAwaiter()
-                                    .GetResult();
+                ynabClient.AddTransactions(budget, transactions)
+                    .GetAwaiter()
+                    .GetResult();
             } 
             catch (Exception ex) 
             {
