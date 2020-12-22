@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,7 @@ namespace SbankenYnab.Clients
 
         public async Task<Models.YNAB.Budget> GetBudgetByName(String name)
         {
-            _logger.LogInformation("Gettin budgets from YNAB...");
+            _logger.LogInformation("Getting budgets from YNAB...");
 
             var budgetResponse = await _client.GetAsync($"/v1/budgets");
 
@@ -52,6 +53,22 @@ namespace SbankenYnab.Clients
             _logger.LogInformation($"Found \"{name}\"");
 
             return budget;
+        }
+
+        public async Task<List<Models.YNAB.Account>> GetAccountsForBudget(String budgetId)
+        {
+            _logger.LogInformation($"Getting accounts for budget {budgetId}...");
+
+            var accountResponse = await _client.GetAsync($"/v1/budgets/{budgetId}/accounts");
+
+            if (!accountResponse.IsSuccessStatusCode) throw new Exception(accountResponse.ReasonPhrase);
+
+            var accountResult = await accountResponse.Content.ReadAsStringAsync();
+            var account = JsonConvert.DeserializeObject<Models.YNAB.AccountResponse>(accountResult);
+
+            _logger.LogInformation($"Found {account.Data.Accounts.Count} accounts for budget {budgetId}.");
+
+            return account.Data.Accounts;
         }
     }
 }

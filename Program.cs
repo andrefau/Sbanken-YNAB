@@ -42,19 +42,23 @@ namespace SbankenYnab
                 sbankenClient.Init().Wait();
                 ynabClient.Init();
 
-                var account = sbankenClient
+                var sbankenAccount = sbankenClient
                                 .GetAccountByName(accountName)
                                 .GetAwaiter()
                                 .GetResult();
 
                 var transactions = sbankenClient
-                                    .GetTransactions(account.AccountId, fromDate: DateTime.Now, toDate: DateTime.Now)
+                                    .GetTransactions(sbankenAccount.AccountId, fromDate: DateTime.Now, toDate: DateTime.Now)
                                     .GetAwaiter()
                                     .GetResult();
 
                 var budget = ynabClient.GetBudgetByName(budgetName)
                                 .GetAwaiter()
                                 .GetResult();
+
+                var ynabAccounts = ynabClient.GetAccountsForBudget(budget.Id)
+                                    .GetAwaiter()
+                                    .GetResult();
             } 
             catch (Exception ex) 
             {
