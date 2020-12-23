@@ -57,11 +57,24 @@ namespace SbankenYnab.Clients
             return budget;
         }
 
-        public async Task AddTransactions(Models.YNAB.Budget budget, List<Models.Sbanken.Transaction> sbankenTransactions)
+        public async Task AddTransactions(Models.YNAB.Budget budget, List<Models.Sbanken.Transaction> sbankenTransactions, String ynabAccountName = null)
         {
             _logger.LogInformation($"Attempting to add transactions to budget {budget.Id}...");
 
-            var account = budget.Accounts[0];
+            Models.YNAB.Account account = null;
+
+            if (ynabAccountName == null) {
+                _logger.LogInformation("Attempting to find default account...");
+                account = budget.Accounts[0];
+            } else {
+                _logger.LogInformation($"Attempting to find account by name {ynabAccountName}...");
+                account = budget.Accounts.Find(a => a.Name == ynabAccountName);
+            }
+
+            if (account == null) throw new ArgumentException("No YNAB account was found.");
+
+            _logger.LogInformation($"Found YNAB account {account.Name}");
+
             var ynabTransactions = new List<Models.YNAB.Transaction>();
 
             sbankenTransactions.ForEach(transaction => {

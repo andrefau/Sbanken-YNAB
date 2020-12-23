@@ -25,15 +25,22 @@ namespace SbankenYnab
             
             logger.LogInformation("*** START ***");
 
-            if (args.Length != 2)
+            if (args.Length < 2)
             {
-                logger.LogError("Missing arguments.\nYou must supply two arguments when running this program.\nExample: dotnet run \"My account\" \"My budget\"");
-                logger.LogInformation("*** EXIT ***");
+                var errorMessage = @"Missing arguments. 
+                    You must supply at least two arguments when running this program.
+                    Example: dotnet run 'My account' 'My budget'
+                    You can also supply an optional third argument that speciefies the account in YNAB.
+                    Example: dotnet run 'My account' 'My budget' 'My YNAB account'";
+
+                logger.LogError(errorMessage);
+                logger.LogInformation("*** EXIT ***\n");
                 return;
             }
 
             var accountName = args[0];
             var budgetName = args[1];
+            var ynabAccountName = args.Length >= 3 ? args[2] : null;
             var sbankenClient = serviceProvider.GetService<SbankenClient>();
             var ynabClient = serviceProvider.GetService<YNABClient>();
 
@@ -54,7 +61,7 @@ namespace SbankenYnab
 
                 if (transactions == null || transactions.Count == 0)
                 {
-                    logger.LogInformation("No transactions found.\n*** EXIT ***");
+                    logger.LogInformation("No transactions found.\n*** EXIT ***\n");
                     return;
                 }
 
@@ -62,18 +69,18 @@ namespace SbankenYnab
                                 .GetAwaiter()
                                 .GetResult();
 
-                ynabClient.AddTransactions(budget, transactions)
+                ynabClient.AddTransactions(budget, transactions, ynabAccountName)
                     .GetAwaiter()
                     .GetResult();
             } 
             catch (Exception ex) 
             {
                 logger.LogError(ex, ex.Message);
-                logger.LogInformation("*** EXIT ***");
+                logger.LogInformation("*** EXIT ***\n");
                 return;
             }
 
-            logger.LogInformation("*** EXIT ***");
+            logger.LogInformation("*** EXIT ***\n");
         }
 
         private static void ConfigureServices(IServiceCollection services)
