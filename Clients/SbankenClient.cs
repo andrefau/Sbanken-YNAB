@@ -96,7 +96,7 @@ namespace SbankenYnab.Clients
             var stringFrom = fromDate.ToString("yyyy-MM-dd");
             var stringTo = toDate.ToString("yyyy-MM-dd");
 
-            var transactionResponse = await _client.GetAsync($"{_bankBasePath}/api/v1/Transactions/{accountId}");
+            var transactionResponse = await _client.GetAsync($"{_bankBasePath}/api/v1/Transactions/{accountId}/?startDate={stringFrom}&endDate{stringTo}");
 
             if (!transactionResponse.IsSuccessStatusCode) throw new Exception(transactionResponse.ReasonPhrase);
 
