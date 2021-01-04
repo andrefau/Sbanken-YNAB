@@ -55,7 +55,7 @@ namespace SbankenYnab
                                 .GetResult();
 
                 var transactions = sbankenClient
-                                    .GetTransactions(sbankenAccount.AccountId, fromDate: DateTime.Now, toDate: DateTime.Now)
+                                    .GetTransactions(sbankenAccount.AccountId, fromDate: DateTime.Now.AddDays(-7), toDate: DateTime.Now)
                                     .GetAwaiter()
                                     .GetResult();
 
