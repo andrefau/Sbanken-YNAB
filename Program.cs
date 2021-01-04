@@ -12,7 +12,7 @@ namespace SbankenYnab
         {
             /** Configure logger */
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File("logs.log")
+                .WriteTo.File("logs.log", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
             
             /** Set up dependency injection */
